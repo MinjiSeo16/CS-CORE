@@ -73,6 +73,24 @@ GC 옵션은 어떤 GC 알고리즘을 선택할 것인가 + GC의 세부 동작
 - JVM은 Serial, Parallel, CMS, G1 GC 같은 여러 GC 알고리즘을 제공하며, 애플리케이션의 처리량 중심인지/응답 지연을 줄이는 것이 중요한지에 따라 선택됩니다.
 - -Xms, -Xmx로 힙 크기를 설정하고, -XX:NewRatio로 Young/Old 영역 비율을 조정하며, -Xlog:gc* 같은 GC 로그 옵션을 통해 실제 동작을 분석해 튜닝할 수 있습니다.
 
+**➕ java heap 최대 사이즈 설정** </br>
+자바 프로그램을 실행할 때 JVM은 힙 메모리를 할당하는데 기본 크기는 OS와 JVM 버전에 따라 자동으로 결정됩니다. 하지만 개발자가 직접 최대 힙 크기를 설절할 수도 있습니다. </br>
+ex) java -Xms512m -Xmx1024m MyApplication //초기 힙 크기: 512MB, 최대 힙 크기: 1024MB
+힙이 너무 작으면 GC가 자주 발생하고, 힙이 너무 크면 Full GC에 시간을 많이 소비하게 되어 적정한 크기를 설정하는 것이 중요합니다.
+
+**➕ heap dump 뜨는 방법** </br>
+JVM의 heap에 있는 현재 객체 상태를 통째로 파일로 저장하는 방법입니다. 즉, 내부 메모리를 어떻게 쓰고 있는지 확인하기 위함입니다.
+- JVM 실행 시 옵션으로 자동 생성
+    - 애플리케이션이 OutOfMemoryError 발생 시 자동으로 heap dump를 남기게 설정하는 방법입니다.
+    - `java -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/path/to/dump.hprof -jar app.jar`
+    - -Xmx1024m  JVM 최대 힙 메모리 (예: 1GB)
+    - -XX:+HeapDumpOnOutOfMemoryError  OOM 발생 시 heap dump 자동 생성
+    - -XX:HeapDumpPath=  dump 파일 저장 경로 지정
+- 실행 중인 JVM에서 수동으로 dump 뜨기
+    - jmap -dump:live,format=b,file=/tmp/heapdump.hprof 12345
+    - 덤프옵션, 살아있는 객체만 포함, 바이너리 포맷, 파일경로, JVM PID
+*GC로그는 얼마나 자주 수집되는지, 얼마나 오래걸리는지만 보여주는데, Heap Dump는 어떤 객체가 얼마만큼의 메모리를 점유하는지 왜 해제되지 않는지까지 자세히 보여줍니다.*
+
 </br>
 
 ## ❓java의 main 메서드가 static인 이유
