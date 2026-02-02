@@ -21,3 +21,23 @@ MVC는 Model, View, Controller의 약자이며, 각 레이어 간의 기능을 �
 **➕ 만약 @RestController 라면? = REST API** </br>
 뷰 리졸버를 사용하지 않고 -> 즉, 위 6,7,8 단계가 생략되고 </br>
 5단계에서 HttpMessageConverter가 자바 객체를 JSON 문자열로 자동 변환해 반환합니다.
+
+</br>
+
+## ❓DispatcherServlet 의 역할에 대해 설명해 주세요.
+- Spring MVC에서 모든 HTTP 요청을 가장 먼저 받아 처리하는 프론트 컨트롤러로, 전체 요청 흐름의 시작점이자 진입점 역할을 합니다.
+- 클라이언트로부터 들어온 요청의 URL과 HTTP Method를 기준으로, 어떤 Controller와 어떤 메서드를 실행할지 결정합니다. 즉 @Controller와 @ReqeustMapping(또는 @GetMapping, @PostMapping)이 붙은 메서드를 찾아 매칭합니다.
+
+
+**➕ 여러 요청이 들어온다고 가정할 때, DispatcherServlet은 한번에 여러 요청을 모두 받을 수 있나요?** </br>
+요청 자체는 DispatcherServlet 하나가 받지만, 요청을 처리하는 스레드는 여러개가 동시에 실행되어 여러 요청을 받을 수 있습니다. Spring MVC는 기본적으로 Tomcat의 요청 스레드풀 기반으로 동작하는데, 예를들어 100개의 요청이 들어오면 Tomcat이 100개의 스레드를 생성하여 각 스레드 안에서 DispatcherServlet이 한 요청씩 처리합니다.
+
+**➕ 수많은 @Controller 를 DispatcherServlet은 어떻게 구분 할까요?** </br>
+DispatcherServlet은 요청을 직접 처리하거나 컨트롤러를 찾지 않습니다. 요청 처리 전반을 조율하는 역할을 합니다.
+- HandlerMapping (컨트롤러 탐색기) : 애플리케이션 시작  모든 @Controller를 스캔해서 URL·HTTP Method·PathVariable·QueryString 조건 등을 기준으로 어떤 요청이 어떤 컨트롤러 메서드와 매핑되는지를 내부적으로 테이블 형태로 관리합니다. 이후 요청이 들어오면 이 정보를 바탕으로 정확한 Handler(컨트롤러 메서드)를 찾아 반환합니다.
+- HandlerAdaptor (실행 담당자) : 찾아낸 Controller 메서드를 호출할 수 있는 적절한 Adapter를 선택 후 해당 메서드를 호출하여 요청을 처리합니다.
+
+**➕ 컨트롤러를 찾았는데 왜 어뎁터를 사용할까?** </br>
+스프링에는 다양한 형태의 컨트롤러가 있어 실행 방식이 모두 다릅니다.
+DispatcherServlet이 이를 직접 처리하면 구조가 복잡해지고, 새로운 컨트롤러가 추가될 때마다 수정이 필요해 OCP를 위반하게 됩니다. 그래서 HandlerAdapter가 컨트롤러에 맞는 실행 방식을 담당하고, 실행 결과를 ModelAndView나 JSON 형태로 DispatcherServlet에 전달합니다.
+
