@@ -41,3 +41,21 @@ DispatcherServlet은 요청을 직접 처리하거나 컨트롤러를 찾지 않
 스프링에는 다양한 형태의 컨트롤러가 있어 실행 방식이 모두 다릅니다.
 DispatcherServlet이 이를 직접 처리하면 구조가 복잡해지고, 새로운 컨트롤러가 추가될 때마다 수정이 필요해 OCP를 위반하게 됩니다. 그래서 HandlerAdapter가 컨트롤러에 맞는 실행 방식을 담당하고, 실행 결과를 ModelAndView나 JSON 형태로 DispatcherServlet에 전달합니다.
 
+</br>
+
+## ❓Interceptor와 Servlet Filter에 대해 설명해 주세요.
+개발을 하다 보면 여러 요청에서 공통적으로 처리해야 하는 로직이 있는데 Spring에서는 이런 중복 코드를 줄이기 위해 Filter, Interceptor, AOP 같은 기능들을 제공합니다. </br>
+세가지 모두 어떤 로직을 수행하기 전이나 후에 공통 기능을 수행할 수 있도록 도와주는 역할을 합니다.
+
+<img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/0ea2b1e5-aecb-4d54-815b-e967f845d376" />
+
+- **필터** : DispatcherServlet에 요청이 전달되기 전/후에 동작합니다. Spring 컨테이너가 아니라 톰캣 같은 웹 컨테이너에서 관리되고, Spring의 범위 밖에서 동작하는 기술입니다. 인코딩 처리, CORS 설정, 공통 인증 검사 등 모든 요청에 대해 전역적으로 처리해야 하는 작업에 사용됩니다.
+- **인터셉터** : DispatcherServlet이 Controller를 호출하기 전/후에 동작합니다. Filter와 달리 Spring 컨텍스트 내부에서 관리되고, Spring MVC 흐름 안에서 요청과 응답을 가공할 수 있습니다. 로그인 여부 검사, 권한 체크 등 Controller와 관련된 로직을 처리할 때 사용합니다.
+
+**➕ 설명만 보면 인터셉터만 쓰는 게 나아 보이는데, 아닌가요?** </br>
+두 기능은 동작 위치가 다르기 때문에 역할도 다릅니다. </br>
+Filter는 가장 앞단에서 동작하기 때문에 HttpServletRequest와 Response 객체를 직접 교체할 수 있습니다. 즉, 요청과 응답 자체를 바꿔치기 할 수 있습니다. </br>
+반면 Interceptor는 DispatcherServlet이 관리하기 때문에 Request/Response 객체를 교체할 수는 없고, 기존 객체에 대한 검사나 속성 추가 정도만 가능합니다.
+
+
+
