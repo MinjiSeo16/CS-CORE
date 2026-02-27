@@ -37,4 +37,26 @@ JPA는 엔티티를 조회할 때 원본 상태를 스냅샷으로 저장해두�
 - **READ_UNCOMMITTED** : 다른 트랜잭션에서 커밋 되지 않은 데이터도 읽을 수 있어 Ditry Read가 발생할 수 있음
 - **READ_COMMITTED** : 커밋된 데이터만 읽지만, 같은 트랜잭션 안에서는 두 번 조회 시 값이 달라질 수 있음 (Non-repeatable Read)
 - **REPEATABLE_READ** : 같은 트랜잭션 내에서는 동일한 조회 결과 보장하지만, 새로운 Row가 추가되는 경우 Phantom Read가 발생할 수 있음
-- **SERIALIZABLE** : 모든 트랜잭션을 순차적으로 실행하여 일관성은 강하지만 성능이 가장 낮음 
+- **SERIALIZABLE** : 모든 트랜잭션을 순차적으로 실행하여 일관성은 강하지만 성능이 가장 낮음
+
+<br>
+
+## ❓스프링 로컬 캐시가 아닌 redis를 쓰는 이유는 무엇일까요?
+로컬 캐시는 애플리케이션 내부 메모리를 사용하기 때문에 단일 서버 환경에서는 가장 빠른 응답 속도를 제공합니다. 하지만 서버가 여러 대로 확장되면 여러 서버가 같은 캐시를 공유할 수 없어 데이터 불일치 문제가 생기고, 서버 재시작 시 데이터가 사라지는 문제도 발생합니다. <br>
+Redis는 별도의 인메모리 서버를 사용하는 Remote Cache로,  위 문제를 해결하고 TTL, 분산 락, Pub/Sub 같은 기능을 제공해 다중 서버 환경이나 확장성을 고려한다면 Redis를 사용하는 것이 더 적합합니다.
+
+<br>
+
+## ❓스프링 시큐리티의 원리와 동작 방식 설명해주세요.
+스프링 시큐리티는 스프링 기반 애플리케이션의 보안을 담당하는 스프링 하위 프레임워크입니다. <br>
+핵심 구조는 **SecurityFilterChain** 기반의 필터 체인 방식으로, 사용자의 요청이 컨트롤러에 가기 전에 여러 보안 필터를 거쳐 인증과 인가를 처리합니다. <br>
+
+<img width="450" height="350" alt="image" src="https://github.com/user-attachments/assets/153941c2-d894-47b8-a9bc-cd1306b1ed4f" />
+
+1. 사용자가 로그인 폼을 통해 아이디와 비밀번호를 전송한다.
+2. **UsernamePasswordAuthenticationFilter**가 HttpServletRequest에서 아이디와 비밀번호를 추출하고 UsernamePasswordAuthenticationToken을 만들어 AuthenticationManager에 전달한다.
+3. **AuthenticationManager**는 실제 인증을 처리할 AuthenticationProvider에게 인증을 위임한다.
+4. **AuthenticationProvider**는 **UserDetailsService**를 호출해 DB에서 사용자 정보를 조회하고, 이를 UserDetails 객체로 반환받는다.
+5. AuthenticationProvider는 사용자가 입력한 비밀번호와 DB에 저장된 암호화 비밀번호를 비교해 인증을 수행한다.
+6. 인증에 성공하면 인증 정보가 담긴 Authentication 객체를 **SecurityContextHolder**에 저장하고 AuthenticationSuccessHandler를 실행합니다. 실패하면 AuthenticationFailureHandler가 실행됩니다.
+
